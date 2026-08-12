@@ -3,12 +3,12 @@
   --foreground: #171717;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 html {
   height: 100%;
@@ -42,8 +42,27 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
+/* @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
+} */
+
+
+
+
+/* Prevent automatic color scheme inversion on mobile browsers */
+:root {
+  color-scheme: light dark;
+}
+
+/* Force light styling or explicitly control input elements if your app is primarily light themed */
+input, textarea, select {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* FORCE LIGHT MODE */
+html {
+  color-scheme: light;
 }
