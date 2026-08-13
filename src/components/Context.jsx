@@ -113,8 +113,8 @@ const router = useRouter();
       const docRef = await addDoc(collection(db, "orders"), orderPayload);
 
       const buyerEmail = orderPayload.accountInfo?.email || '';
-      const sellerEmail = 'victorndu393@gmail.com';
-      // const sellerEmail = 'beesinterior@gmail.com';
+      // const sellerEmail = 'victorndu393@gmail.com';
+      const sellerEmail = 'beesinterior@gmail.com';
 
       await fetch('/api/send-order-email', {
         method: 'POST',
@@ -206,11 +206,10 @@ const router = useRouter();
          Swal.fire({
               icon: "success",
               title: "Payment Successful!",
-              text: "Your subscription has been activated.",
-              timer: 2000,
+              text: "Order successful. Navigating to your orders...",
+              timer: 3000,
               showConfirmButton: false,
-              allowOutsideClick: false,
-              confirmButtonText:"View my orders"
+              allowOutsideClick:false
             }).then(() => {
               window.location.href = '/dashboard/myorders';
             });
@@ -272,8 +271,8 @@ const router = useRouter();
       createdAt: new Date().toISOString(),
       paymentMethod: "Paystack",
       currency: currency,
-      // subaccount: "ACCT_7k2sd8z7pxgyce9",
-      // bearer: "subaccount",
+      subaccount: "ACCT_7k2sd8z7pxgyce9",
+      bearer: "subaccount",
       metadata: {
         custom_payment_verification_number: verificationNumber,
         source,

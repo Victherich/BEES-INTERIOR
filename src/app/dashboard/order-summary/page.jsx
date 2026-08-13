@@ -238,8 +238,8 @@ const handleRemovePromo = () => {
 
     try {
       const buyerEmail = currentUser?.email || userData?.email || '';
-      const sellerEmail = 'victorndu393@gmail.com'; // Replace with your seller destination email
-        // const sellerEmail = 'beesinterior@gmail.com'; // Replace with your seller destination email
+      // const sellerEmail = 'victorndu393@gmail.com'; // Replace with your seller destination email
+        const sellerEmail = 'beesinterior@gmail.com'; // Replace with your seller destination email
 const uniqueOrderNumber = `BEES-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
 
 

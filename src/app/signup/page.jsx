@@ -281,7 +281,58 @@ export default function UserSignup() {
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = async (e) => {
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   if (form.email !== form.confirmEmail) {
+  //     return Swal.fire("Error", "Emails do not match", "error");
+  //   }
+
+  //   if (form.password !== form.confirmPassword) {
+  //     return Swal.fire("Error", "Passwords do not match", "error");
+  //   }
+
+  //   if (!agreed) {
+  //     return Swal.fire(
+  //       "Required",
+  //       "You must agree to the Terms & Privacy Policy to continue",
+  //       "warning"
+  //     );
+  //   }
+
+  //   Swal.fire({
+  //     title: "Please wait...",
+  //     text: "Setting up your Bees Interior account...",
+  //     allowOutsideClick: false,
+  //     didOpen: () => Swal.showLoading(),
+  //   });
+
+  //   try {
+  //     const { name, email, phone, password, role } = form;
+  //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
+
+  //     await updateProfile(user, { displayName: name });
+
+  //     await setDoc(doc(db, "users", user.uid), {
+  //       uid: user.uid,
+  //       name,
+  //       email,
+  //       phone,
+  //       role, // Stored safely in Firestore backend
+  //       createdAt: new Date(),
+  //     });
+
+  //     Swal.fire("Success 🎉", "Welcome to Bees Interior! Your account is ready.", "success");
+  //     router.push("/login");
+  //   } catch (err) {
+  //     Swal.fire("Error ❌", err.message, "error");
+  //   }
+  // };
+
+
+
+const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (form.email !== form.confirmEmail) {
@@ -309,26 +360,34 @@ export default function UserSignup() {
 
     try {
       const { name, email, phone, password, role } = form;
+      
+      // 1. This creates the user AND automatically logs them into Firebase
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
       await updateProfile(user, { displayName: name });
 
+      // 2. Creates their database record
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         name,
         email,
         phone,
-        role, // Stored safely in Firestore backend
+        role, 
         createdAt: new Date(),
       });
 
       Swal.fire("Success 🎉", "Welcome to Bees Interior! Your account is ready.", "success");
-      router.push("/login");
+      
+      // 3. FIX: Redirect to Dashboard, NOT login, because they are already logged in
+      router.push("/dashboard"); 
+      
     } catch (err) {
       Swal.fire("Error ❌", err.message, "error");
     }
   };
+
+
 
   return (
     <PageContainer>

@@ -203,6 +203,153 @@ const LoadingContainer = styled.div`
   font-weight: 600;
 `;
 
+// export default function UsersManagementPage() {
+//   const [users, setUsers] = useState([]);
+//   const [loading, setLoading] = useState(true);
+//   const [searchQuery, setSearchQuery] = useState("");
+
+//   const fetchUsers = async () => {
+//     try {
+//       setLoading(true);
+//       const querySnapshot = await getDocs(collection(db, "users"));
+//       const list = querySnapshot.docs.map((doc) => ({
+//         id: doc.id,
+//         ...doc.data(),
+//       }));
+//       setUsers(list);
+//     } catch (error) {
+//       Swal.fire("Error", "Failed to fetch users.", "error");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetchUsers();
+//   }, []);
+
+//   const handleToggleAdmin = async (user) => {
+//     const newAdminStatus = !user.isAdmin;
+//     try {
+//       const userRef = doc(db, "users", user.id);
+//       await updateDoc(userRef, {
+//         isAdmin: newAdminStatus,
+//         updatedAt: serverTimestamp(),
+//       });
+//       Swal.fire("Updated!", `User role updated successfully.`, "success");
+//       fetchUsers();
+//     } catch (error) {
+//       Swal.fire("Error", "Could not update user role.", "error");
+//     }
+//   };
+
+//   const handleToggleSuspend = async (user) => {
+//     const newSuspendStatus = !user.isSuspended;
+//     const actionText = newSuspendStatus ? "suspend" : "activate";
+    
+//     const result = await Swal.fire({
+//       title: "Are you sure?",
+//       text: `Do you want to ${actionText} this user account?`,
+//       icon: "warning",
+//       showCancelButton: true,
+//       confirmButtonColor: newSuspendStatus ? Danger : Success,
+//       cancelButtonColor: TextMuted,
+//       confirmButtonText: `Yes, ${actionText} it!`,
+//     });
+
+//     if (result.isConfirmed) {
+//       try {
+//         const userRef = doc(db, "users", user.id);
+//         await updateDoc(userRef, {
+//           isSuspended: newSuspendStatus,
+//           updatedAt: serverTimestamp(),
+//         });
+//         Swal.fire("Success!", `User account has been ${actionText}ed.`, "success");
+//         fetchUsers();
+//       } catch (error) {
+//         Swal.fire("Error", `Could not ${actionText} user account.`, "error");
+//       }
+//     }
+//   };
+
+//   const filteredUsers = users.filter((u) => {
+//     const nameMatch = u.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+//     const emailMatch = u.email?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
+//     return nameMatch || emailMatch;
+//   });
+
+//   if (loading) {
+//     return <LoadingContainer>Loading users directory...</LoadingContainer>;
+//   }
+
+//   return (
+//     <Container>
+//       <HeaderBanner>
+//         <ColorfulTitle>User Accounts Management 👥</ColorfulTitle>
+//         <ColorfulSub>Monitor platform members, assign administrative privileges, and manage account statuses.</ColorfulSub>
+//       </HeaderBanner>
+
+//       <SearchContainer>
+//         <StyledInput 
+//           type="text" 
+//           placeholder="Search users by name or email..." 
+//           value={searchQuery} 
+//           onChange={(e) => setSearchQuery(e.target.value)} 
+//         />
+//       </SearchContainer>
+
+//       <ActionRow>
+//         <ColorfulSectionTitle>Registered Users ({filteredUsers.length})</ColorfulSectionTitle>
+//       </ActionRow>
+
+//       {filteredUsers.length === 0 ? (
+//         <LoadingContainer>No matching users found.</LoadingContainer>
+//       ) : (
+//         <UsersGrid>
+//           {filteredUsers.map((user) => (
+//             <UserCard key={user.id} $isAdmin={user.isAdmin} $isSuspended={user.isSuspended}>
+//               <CardHeader>
+//                 <UserInfo>
+//                   <UserName>{user.name || "Unnamed User"}</UserName>
+//                   <UserEmail>{user.email || "No email provided"}</UserEmail>
+//                 </UserInfo>
+//                 <BadgeContainer>
+//                   {user.isSuspended && <Badge $variant="danger">Suspended</Badge>}
+//                   {user.isAdmin && <Badge $variant="gold">Admin</Badge>}
+//                   {!user.isAdmin && !user.isSuspended && <Badge>Active</Badge>}
+//                 </BadgeContainer>
+//               </CardHeader>
+              
+//               <ButtonGroup>
+//                 <AdminButton onClick={() => handleToggleAdmin(user)}>
+//                   {user.isAdmin ? "Remove Admin" : "Make Admin"}
+//                 </AdminButton>
+//                 <SuspendButton 
+//                   $isSuspended={user.isSuspended} 
+//                   onClick={() => handleToggleSuspend(user)}
+//                 >
+//                   {user.isSuspended ? "Activate" : "Suspend"}
+//                 </SuspendButton>
+//               </ButtonGroup>
+//             </UserCard>
+//           ))}
+//         </UsersGrid>
+//       )}
+//     </Container>
+//   );
+// }
+
+// import React, { useState, useEffect } from "react";
+// import { db } from "../firebase"; // Adjust your firebase import path if necessary
+// import { 
+//   collection, 
+//   getDocs, 
+//   doc, 
+//   updateDoc, 
+//   serverTimestamp 
+// } from "firebase/firestore";
+// import Swal from "sweetalert2";
+
 export default function UsersManagementPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -212,12 +359,13 @@ export default function UsersManagementPage() {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collection(db, "users"));
-      const list = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
+      const list = querySnapshot.docs.map((docSnap) => ({
+        id: docSnap.id,
+        ...docSnap.data(),
       }));
       setUsers(list);
     } catch (error) {
+      console.error("Error fetching users:", error);
       Swal.fire("Error", "Failed to fetch users.", "error");
     } finally {
       setLoading(false);
@@ -229,17 +377,37 @@ export default function UsersManagementPage() {
   }, []);
 
   const handleToggleAdmin = async (user) => {
-    const newAdminStatus = !user.isAdmin;
-    try {
-      const userRef = doc(db, "users", user.id);
-      await updateDoc(userRef, {
-        isAdmin: newAdminStatus,
-        updatedAt: serverTimestamp(),
-      });
-      Swal.fire("Updated!", `User role updated successfully.`, "success");
-      fetchUsers();
-    } catch (error) {
-      Swal.fire("Error", "Could not update user role.", "error");
+    const nextIsAdmin = !user.isAdmin;
+    const newRole = nextIsAdmin ? "admin" : "customer";
+    const actionText = nextIsAdmin ? "promote this user to Admin" : "demote this user to Customer";
+
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: `Do you want to ${actionText}?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: `Yes, update role!`,
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const userRef = doc(db, "users", user.id);
+        await updateDoc(userRef, {
+          isAdmin: nextIsAdmin,
+          role: newRole, // Syncing role string for multi-purpose backend checks
+          updatedAt: serverTimestamp(),
+        });
+        
+        // Optimistically update local state for instant feedback
+        setUsers(users.map(u => u.id === user.id ? { ...u, isAdmin: nextIsAdmin, role: newRole } : u));
+
+        Swal.fire("Updated!", `User role successfully updated to ${newRole}.`, "success");
+      } catch (error) {
+        console.error("Error updating user role:", error);
+        Swal.fire("Error", "Could not update user role.", "error");
+      }
     }
   };
 
@@ -252,8 +420,8 @@ export default function UsersManagementPage() {
       text: `Do you want to ${actionText} this user account?`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: newSuspendStatus ? Danger : Success,
-      cancelButtonColor: TextMuted,
+      confirmButtonColor: newSuspendStatus ? "#d33" : "#28a745",
+      cancelButtonColor: "#6c757d",
       confirmButtonText: `Yes, ${actionText} it!`,
     });
 
@@ -264,9 +432,13 @@ export default function UsersManagementPage() {
           isSuspended: newSuspendStatus,
           updatedAt: serverTimestamp(),
         });
+
+        // Optimistically update local state
+        setUsers(users.map(u => u.id === user.id ? { ...u, isSuspended: newSuspendStatus } : u));
+
         Swal.fire("Success!", `User account has been ${actionText}ed.`, "success");
-        fetchUsers();
       } catch (error) {
+        console.error("Error updating suspension status:", error);
         Swal.fire("Error", `Could not ${actionText} user account.`, "error");
       }
     }
