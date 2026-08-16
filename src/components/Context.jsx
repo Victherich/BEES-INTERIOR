@@ -306,6 +306,8 @@ const router = useRouter();
         email,
         firstname: firstName,
         lastname: lastName,
+        subaccount: "ACCT_7k2sd8z7pxgyce9",
+      bearer: "subaccount",
         metadata: {
           custom_payment_verification_number: verificationNumber,
           source,
