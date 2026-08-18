@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import Swal from "sweetalert2";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
 
 // 🎨 BEES INTERIOR THEME COLORS
@@ -16,7 +16,7 @@ const Gold = "#D4AF37";
 const TextMuted = "#475569";
 const LightBg = "#f8fafc";
 
-// 🌟 Styled Components (Matching the SignUp layout & 10px spacing guidelines)
+// 🌟 Styled Components (Matching the Auth layout & 10px spacing guidelines)
 const PageContainer = styled.div`
   min-height: 100vh;
   display: flex;
@@ -151,28 +151,6 @@ const Input = styled.input`
   }
 `;
 
-const PasswordWrapper = styled.div`
-  position: relative;
-  width: 100%;
-`;
-
-const EyeButton = styled.button`
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 0.8rem;
-  color: ${Blue};
-  font-weight: 600;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
 const Button = styled.button`
   width: 100%;
   background: linear-gradient(135deg, ${Blue} 0%, ${Gold} 100%);
@@ -208,60 +186,36 @@ const LinkText = styled.p`
   }
 `;
 
-const LoadingContainer = styled.div`
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: ${LightBg};
-  color: ${Dark};
-  font-size: 1.1rem;
-  font-weight: 600;
-`;
-
-// ✨ LOGIN COMPONENT
-export default function UserLogin() {
+// ✨ FORGOT PASSWORD COMPONENT (FIREBASE CLIENT SDK)
+export default function ForgotPassword() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(false);
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [email, setEmail] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     Swal.fire({
       title: "Please wait...",
-      text: "Logging into Bees Interior...",
+      text: "Sending password reset link...",
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
     });
 
     try {
-      const { email, password } = form;
-      await signInWithEmailAndPassword(auth, email, password);
-      Swal.fire("Success ✅", "Logged in successfully", "success");
-      router.push("/dashboard");
+      await sendPasswordResetEmail(auth, email);
+      
+      await Swal.fire({
+        title:"Email Sent ✅",
+        text:"A password reset link has been sent to your email. Please check your email or spam folder and reset your password then come back here and login with your new password",
+        icon:"success",
+        allowOutsideClick:false,
+    });
+      
+      router.push("/login");
     } catch (error) {
-      Swal.fire("Login Failed ❌", error.message, "error");
+      Swal.fire("Error ❌", error.message, "error");
     }
   };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setAuthenticated(!!user);
-      setLoading(false);
-      if (user) router.push("/dashboard");
-    });
-
-    return () => unsubscribe();
-  }, [router]);
-
-  if (loading) return <LoadingContainer>Loading...</LoadingContainer>;
 
   return (
     <PageContainer>
@@ -272,9 +226,9 @@ export default function UserLogin() {
             BEES <span>INTERIOR</span>
           </BrandLogo>
           <BrandingContent>
-            <Headline>Welcome Back to Your Sanctuary</Headline>
+            <Headline>Recover Your Sanctuary</Headline>
             <Subtext>
-              Log in to access your luxury interior collections, track consultations, and manage your personalized living spaces.
+              Don't worry, it happens. Enter your registered email address below and we'll send you instructions to reset your password.
             </Subtext>
           </BrandingContent>
           <div />
@@ -283,7 +237,7 @@ export default function UserLogin() {
         {/* Right Form Panel */}
         <FormSide>
           <FormHeader>
-            <Title>Login</Title>
+            <Title>Forgot Password</Title>
           </FormHeader>
 
           <form onSubmit={handleSubmit}>
@@ -294,37 +248,16 @@ export default function UserLogin() {
                   name="email"
                   type="email"
                   placeholder="john@example.com"
-                  value={form.email}
-                  onChange={handleChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </InputGroup>
 
-              <InputGroup>
-                <Label>Password</Label>
-                <PasswordWrapper>
-                  <Input
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    value={form.password}
-                    onChange={handleChange}
-                    required
-                  />
-                  <EyeButton type="button" onClick={() => setShowPassword((prev) => !prev)}>
-                    {showPassword ? "Hide" : "Show"}
-                  </EyeButton>
-                </PasswordWrapper>
-              </InputGroup>
+              <Button type="submit">Send Reset Link</Button>
 
-              <Button type="submit">Login</Button>
-
-              <LinkText onClick={() => router.push("/signup")}>
-                Don't have an account? <span>Sign Up</span>
-              </LinkText>
-
-               <LinkText onClick={() => router.push("/forgot-password")}>
-                <span>Forgot Password</span>
+              <LinkText onClick={() => router.push("/login")}>
+                Remembered your password? <span>Login</span>
               </LinkText>
             </FormGrid>
           </form>
